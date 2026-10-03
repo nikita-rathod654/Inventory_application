@@ -47,6 +47,12 @@ Open http://localhost:3000.
 
 Push to GitHub, import the repo into Vercel, add the same environment variables, then add your Vercel domain as a trusted domain in the Stack Auth / Hexclave dashboard.
 
-## Credits
+## Screenshots 
 
-Based on the [PedroTech Next.js inventory course](https://youtu.be/L5CsIkO5xv4).
+<img width="1344" height="664" alt="image" src="https://github.com/user-attachments/assets/7ca69125-235c-4212-9ffa-0442b23385bd" />
+
+<img width="1340" height="691" alt="image" src="https://github.com/user-attachments/assets/ae888077-a0b8-4314-836e-855a90de49be" />
+
+<img width="1333" height="675" alt="image" src="https://github.com/user-attachments/assets/fe7f5778-e76c-4b0b-ac4a-4e28717edf0b" />
+
+<img width="1333" height="610" alt="image" src="https://github.com/user-attachments/assets/ba354cbc-061c-4958-8726-d4ffa3ac2a73" />
