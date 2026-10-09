@@ -46,29 +46,25 @@ export default async function DashboardPage() {
   const weeklyProductsData = [];
 
   for (let i = 11; i >= 0; i--) {
-    const weekStart = new Date(now);
-    weekStart.setDate(weekStart.getDate() - i * 7);
-    weekStart.setHours(0, 0, 0, 0);
+  const weekStart = new Date(now);
+  weekStart.setDate(weekStart.getDate() - i * 7);
+  weekStart.setHours(0, 0, 0, 0);
 
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
-    weekStart.setHours(23, 59, 59, 999);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
 
-    const weekLabel = `${String(weekStart.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}/${String(weekStart.getDate() + 1).padStart(2, "0")}`;
+  const weekLabel = `${String(weekStart.getMonth() + 1).padStart(2, "0")}/${String(
+    weekStart.getDate()
+  ).padStart(2, "0")}`;
 
-    const weekProducts = allProducts.filter((product) => {
-      const productDate = new Date(product.createdAt);
-      return productDate >= weekStart && productDate <= weekEnd;
-    });
+  const weekProducts = allProducts.filter((product) => {
+    const productDate = new Date(product.createdAt);
+    return productDate >= weekStart && productDate <= weekEnd;
+  });
 
-    weeklyProductsData.push({
-      week: weekLabel,
-      products: weekProducts.length,
-    });
-  }
+  weeklyProductsData.push({ week: weekLabel, products: weekProducts.length });
+}
 
   const recent = await prisma.product.findMany({
     where: { userId },
@@ -94,7 +90,7 @@ export default async function DashboardPage() {
   });
 
   const cardClass =
-    "rounded-3xl border border-[#1B1635]/10 bg-white p-7 shadow-sm shadow-[#1B1635]/[0.04]";
+    "min-w-0 rounded-2xl border border-[#1B1635]/10 bg-white p-5 shadow-sm shadow-[#1B1635]/[0.04] sm:rounded-3xl sm:p-7";
 
   const stockStyles = [
     {
@@ -120,22 +116,24 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#F6F5FA] text-[#1B1635] antialiased">
       <Sidebar currentPath="/dashboard" />
-      <main className="ml-64 p-8 lg:p-12">
+      <main className="px-4 pb-8 pt-20 sm:px-6 lg:ml-64 lg:p-8">
         {/* Header */}
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Dashboard
+            </h1>
             <p className="mt-1.5 text-sm text-[#1B1635]/60">
               Welcome back! Here is an overview of your inventory.
             </p>
           </div>
-          <p className="rounded-full border border-[#1B1635]/10 bg-white px-4 py-2 text-sm text-[#1B1635]/65">
+          <p className="w-fit rounded-full border border-[#1B1635]/10 bg-white px-4 py-2 text-xs text-[#1B1635]/65 sm:text-sm">
             {todayLabel}
           </p>
         </div>
 
         {/* Hero summary band */}
-        <section className="relative mb-6 overflow-hidden rounded-3xl bg-[#1B1635] p-8 text-white lg:p-10">
+        <section className="relative mb-5 overflow-hidden rounded-2xl bg-[#1B1635] p-5 text-white sm:mb-6 sm:rounded-3xl sm:p-8 lg:p-10">
           <div
             aria-hidden="true"
             className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[#5B3FD9]/40 blur-3xl"
@@ -145,28 +143,28 @@ export default async function DashboardPage() {
             className="absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-[#F5B83D]/10 blur-3xl"
           />
 
-          <div className="relative grid items-end gap-10 lg:grid-cols-[1.2fr_1fr]">
-            <div>
+          <div className="relative grid items-end gap-6 sm:gap-10 lg:grid-cols-[1.2fr_1fr]">
+            <div className="min-w-0">
               <p className="text-sm text-white/60">Total inventory value</p>
-              <p className="mt-3 text-5xl font-semibold tabular-nums tracking-tight sm:text-6xl">
+              <p className="mt-2 break-words text-4xl font-semibold tabular-nums tracking-tight sm:mt-3 sm:text-5xl lg:text-6xl">
                 ${Number(totalValue).toFixed(0)}
               </p>
-              <p className="mt-3 text-sm text-white/55">
+              <p className="mt-2 text-sm text-white/55 sm:mt-3">
                 across {totalProducts}{" "}
                 {totalProducts === 1 ? "product" : "products"}
               </p>
             </div>
 
-            <dl className="grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/[0.06] py-5 backdrop-blur-sm">
-              <div className="px-5">
-                <dd className="text-3xl font-semibold tabular-nums">
+            <dl className="grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/[0.06] py-4 backdrop-blur-sm sm:py-5">
+              <div className="px-3 sm:px-5">
+                <dd className="text-2xl font-semibold tabular-nums sm:text-3xl">
                   {totalProducts}
                 </dd>
                 <dt className="mt-1 text-xs text-white/55">Products</dt>
               </div>
-              <div className="px-5">
+              <div className="px-3 sm:px-5">
                 <dd
-                  className={`text-3xl font-semibold tabular-nums ${
+                  className={`text-2xl font-semibold tabular-nums sm:text-3xl ${
                     lowStock > 0 ? "text-[#F5B83D]" : ""
                   }`}
                 >
@@ -174,9 +172,9 @@ export default async function DashboardPage() {
                 </dd>
                 <dt className="mt-1 text-xs text-white/55">Low stock</dt>
               </div>
-              <div className="px-5">
+              <div className="px-3 sm:px-5">
                 <dd
-                  className={`text-3xl font-semibold tabular-nums ${
+                  className={`text-2xl font-semibold tabular-nums sm:text-3xl ${
                     outOfStockCount > 0 ? "text-[#FF8A80]" : ""
                   }`}
                 >
@@ -189,7 +187,7 @@ export default async function DashboardPage() {
         </section>
 
         {/* Chart + ring */}
-        <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.8fr_1fr]">
+        <div className="mb-5 grid grid-cols-1 gap-5 sm:mb-6 sm:gap-6 xl:grid-cols-[1.8fr_1fr]">
           <section className={cardClass}>
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -201,7 +199,7 @@ export default async function DashboardPage() {
                 </p>
               </div>
             </div>
-            <div className="mt-8 h-56">
+            <div className="mt-6 h-52 w-full min-w-0 sm:mt-8 sm:h-56">
               <ProductsChart data={weeklyProductsData} />
             </div>
           </section>
@@ -213,7 +211,7 @@ export default async function DashboardPage() {
             </p>
 
             <div className="mt-6 flex justify-center">
-              <div className="relative h-44 w-44">
+              <div className="relative h-36 w-36 sm:h-44 sm:w-44">
                 <svg
                   viewBox="0 0 160 160"
                   className="h-full w-full -rotate-90"
@@ -261,7 +259,7 @@ export default async function DashboardPage() {
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-3xl font-semibold tabular-nums tracking-tight">
+                    <div className="text-2xl font-semibold tabular-nums tracking-tight sm:text-3xl">
                       {inStockPercentage}%
                     </div>
                     <div className="text-xs text-[#1B1635]/55">In stock</div>
@@ -270,7 +268,7 @@ export default async function DashboardPage() {
               </div>
             </div>
 
-            <ul className="mt-6 space-y-2.5 text-sm">
+            <ul className="mx-auto mt-6 max-w-sm space-y-2.5 text-sm xl:max-w-none">
               <li className="flex items-center justify-between text-[#1B1635]/70">
                 <span className="flex items-center gap-2.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-[#5B3FD9]" />
@@ -303,8 +301,8 @@ export default async function DashboardPage() {
         </div>
 
         {/* Stock levels table */}
-        <section className="overflow-hidden rounded-3xl border border-[#1B1635]/10 bg-white shadow-sm shadow-[#1B1635]/[0.04]">
-          <div className="px-7 pb-5 pt-7">
+        <section className="min-w-0 overflow-hidden rounded-2xl border border-[#1B1635]/10 bg-white shadow-sm shadow-[#1B1635]/[0.04] sm:rounded-3xl">
+          <div className="px-4 pb-4 pt-5 sm:px-7 sm:pb-5 sm:pt-7">
             <h2 className="text-lg font-semibold tracking-tight">
               Stock levels
             </h2>
@@ -314,18 +312,22 @@ export default async function DashboardPage() {
           </div>
 
           {recent.length === 0 ? (
-            <p className="mx-7 mb-7 rounded-2xl bg-[#F6F5FA] px-4 py-10 text-center text-sm text-[#1B1635]/55">
+            <p className="mx-4 mb-5 rounded-2xl bg-[#F6F5FA] px-4 py-8 text-center text-sm text-[#1B1635]/55 sm:mx-7 sm:mb-7 sm:py-10">
               No products yet. Add your first product to see its stock here.
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-left">
+              <table className="w-full text-left">
                 <thead>
                   <tr className="border-y border-[#1B1635]/10 bg-[#F6F5FA]/70 text-xs text-[#1B1635]/50">
-                    <th className="px-7 py-3 font-medium">Product</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="w-1/3 px-4 py-3 font-medium">Level</th>
-                    <th className="px-7 py-3 text-right font-medium">Units</th>
+                    <th className="px-4 py-3 font-medium sm:px-7">Product</th>
+                    <th className="px-2 py-3 font-medium sm:px-4">Status</th>
+                    <th className="hidden w-1/3 px-4 py-3 font-medium md:table-cell">
+                      Level
+                    </th>
+                    <th className="px-4 py-3 text-right font-medium sm:px-7">
+                      Units
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#1B1635]/[0.07]">
@@ -342,17 +344,17 @@ export default async function DashboardPage() {
 
                     return (
                       <tr key={key}>
-                        <td className="px-7 py-4 text-sm font-medium">
+                        <td className="max-w-[140px] truncate px-4 py-3.5 text-sm font-medium sm:max-w-none sm:px-7 sm:py-4">
                           {product.name}
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="px-2 py-3.5 sm:px-4 sm:py-4">
                           <span
-                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium ${style.pill}`}
+                            className={`inline-block whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium sm:px-3 ${style.pill}`}
                           >
                             {style.label}
                           </span>
                         </td>
-                        <td className="px-4 py-4">
+                        <td className="hidden px-4 py-4 md:table-cell">
                           <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1B1635]/[0.07]">
                             <div
                               className={`h-full rounded-full ${style.bar}`}
@@ -361,9 +363,10 @@ export default async function DashboardPage() {
                           </div>
                         </td>
                         <td
-                          className={`px-7 py-4 text-right text-sm font-semibold tabular-nums ${style.text}`}
+                          className={`whitespace-nowrap px-4 py-3.5 text-right text-sm font-semibold tabular-nums sm:px-7 sm:py-4 ${style.text}`}
                         >
-                          {product.quantity} units
+                          {product.quantity}
+                          <span className="hidden sm:inline"> units</span>
                         </td>
                       </tr>
                     );
