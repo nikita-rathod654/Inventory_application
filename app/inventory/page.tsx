@@ -240,7 +240,7 @@ export default async function InventoryPage({
                           </div>
                         </dl>
 
-                        <ActionForm
+                        {/* <ActionForm
                           className="mt-4"
                           action={removeProduct}
                           success="Product deleted"
@@ -250,8 +250,44 @@ export default async function InventoryPage({
                             {deleteIcon}
                             Delete
                           </button>
-                        </ActionForm>
+                        </ActionForm> */}
+
+
+                                                <div className="mt-4 flex gap-2">
+                          <Link
+                            href={`/inventory/${product.id}`}
+                            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#5B3FD9]/20 px-3 py-2.5 text-sm font-medium text-[#4A31BD] transition-colors hover:bg-[#5B3FD9]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B3FD9]"
+                          >
+                            <svg
+                              viewBox="0 0 24 24"
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <circle cx="12" cy="12" r="9" />
+                              <path d="M12 7v5l3 2" />
+                            </svg>
+                            History
+                          </Link>
+
+                          <ActionForm
+                            className="flex-1"
+                            action={removeProduct}
+                            success="Product deleted"
+                          >
+                            <input type="hidden" name="id" value={product.id} />
+                            <button className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#D6453D]/20 px-3 py-2.5 text-sm font-medium text-[#B3342D] transition-colors hover:bg-[#D6453D]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6453D]">
+                              {deleteIcon}
+                              Delete
+                            </button>
+                          </ActionForm>
+                        </div>
                       </li>
+                    
                     );
                   })}
                 </ul>
