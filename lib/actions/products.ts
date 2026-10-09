@@ -1,17 +1,31 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { getCurrentUser } from "../auth";
 import { prisma } from "../prisma";
-import { z } from "zod";
+import {
+  ProductSchema,
+  type ProductField,
+  type ProductFormState,
+} from "../validations/product";
 
-const ProductSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  price: z.coerce.number().nonnegative("Price must be non-negative"),
-  quantity: z.coerce.number().int().min(0, "Quantity must be non-negative"),
-  sku: z.string().optional(),
-  lowStockAt: z.coerce.number().int().min(0).optional(),
-});
+const FIELDS: ProductField[] = [
+  "name",
+  "sku",
+  "price",
+  "quantity",
+  "lowStockAt",
+];
+
+function readForm(formData: FormData) {
+  const values: Partial<Record<ProductField, string>> = {};
+  for (const field of FIELDS) {
+    values[field] = String(formData.get(field) ?? "");
+  }
+  return values;
+}
 
 export async function deleteProduct(formData: FormData) {
   const user = await getCurrentUser();
@@ -20,31 +34,67 @@ export async function deleteProduct(formData: FormData) {
   await prisma.product.deleteMany({
     where: { id: id, userId: user.id },
   });
+
+  revalidatePath("/inventory");
+  revalidatePath("/dashboard");
 }
 
-export async function createProduct(formData: FormData) {
+export async function createProduct(
+  _prevState: ProductFormState,
+  formData: FormData
+): Promise<ProductFormState> {
   const user = await getCurrentUser();
+  const values = readForm(formData);
 
-  const parsed = ProductSchema.safeParse({
-    name: formData.get("name"),
-    price: formData.get("price"),
-    quantity: formData.get("quantity"),
-    sku: formData.get("sku") || undefined,
-    lowStockAt: formData.get("lowStockAt") || undefined,
-  });
-
+  const parsed = ProductSchema.safeParse(values);
   if (!parsed.success) {
-    throw new Error("Validation failed");
+    return {
+      ok: false,
+      message: "Please fix the highlighted fields.",
+      errors: z.flattenError(parsed.error).fieldErrors,
+      values,
+    };
   }
 
   try {
-    await prisma.product.create({
-      data: { ...parsed.data, userId: user.id },
+        await prisma.product.create({
+      data: {
+        ...parsed.data,
+        userId: user.id,
+        ...(parsed.data.quantity > 0 && {
+          movements: {
+            create: {
+              userId: user.id,
+              change: parsed.data.quantity,
+              quantityAfter: parsed.data.quantity,
+              reason: "INITIAL",
+            },
+          },
+        }),
+      },
     });
   } catch (error) {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return {
+        ok: false,
+        message: "That SKU is already in use.",
+        errors: { sku: ["This SKU is already used by another product"] },
+        values,
+      };
+    }
     console.error("createProduct error:", error);
-    throw new Error("Failed to create product.");
+    return {
+      ok: false,
+      message: "Something went wrong. Please try again.",
+      values,
+    };
   }
 
-  redirect("/inventory");
+  revalidatePath("/inventory");
+  revalidatePath("/dashboard");
+
+  return { ok: true, message: "Product added" };
 }

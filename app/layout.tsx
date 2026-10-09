@@ -3,6 +3,9 @@ import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackServerApp } from "../stack/server";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
+
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +56,7 @@ export default function RootLayout({
         <StackProvider app={stackServerApp}>
           <StackTheme theme={authTheme}>{children}</StackTheme>
         </StackProvider>
+        <Toaster position="top-center" richColors closeButton />
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+import ActionForm from "@/components/action-form";
 import Pagination from "@/components/pagination";
 import Sidebar from "@/components/sidebar";
 import { deleteProduct } from "@/lib/actions/products";
@@ -57,8 +58,7 @@ export default async function InventoryPage({
     },
   ];
 
-  const headCell =
-    "px-4 py-3 text-left text-xs font-medium text-[#1B1635]/50";
+  const headCell = "px-4 py-3 text-left text-xs font-medium text-[#1B1635]/50";
 
   const deleteIcon = (
     <svg
@@ -75,6 +75,11 @@ export default async function InventoryPage({
     </svg>
   );
 
+  async function removeProduct(formData: FormData) {
+    "use server";
+    await deleteProduct(formData);
+  }
+
   return (
     <div className="min-h-screen bg-[#F6F5FA] text-[#1B1635] antialiased">
       <Sidebar currentPath="/inventory" />
@@ -89,10 +94,26 @@ export default async function InventoryPage({
               Manage your products and track inventory levels.
             </p>
           </div>
-          <p className="w-fit max-w-full truncate rounded-full border border-[#1B1635]/10 bg-white px-4 py-2 text-xs text-[#1B1635]/65 sm:text-sm">
-            {totalCount} {totalCount === 1 ? "product" : "products"}
-            {q ? ` matching "${q}"` : ""}
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="w-fit max-w-full truncate rounded-full border border-[#1B1635]/10 bg-white px-4 py-2 text-xs text-[#1B1635]/65 sm:text-sm">
+              {totalCount} {totalCount === 1 ? "product" : "products"}
+              {q ? ` matching "${q}"` : ""}
+            </p>
+
+            <Link
+              href="/inventory/import"
+              className="rounded-full border border-[#1B1635]/15 bg-white px-4 py-2 text-xs font-medium text-[#1B1635] transition-colors hover:border-[#1B1635]/30 hover:bg-[#1B1635]/[0.03] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B3FD9] sm:text-sm"
+            >
+              Import CSV
+            </Link>
+
+            <a
+              href={`/api/inventory/export${q ? `?q=${encodeURIComponent(q)}` : ""}`}
+              className="rounded-full bg-[#5B3FD9] px-4 py-2 text-xs font-medium text-white shadow-md shadow-[#5B3FD9]/25 transition-colors hover:bg-[#4A31BD] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B3FD9] sm:text-sm"
+            >
+              Export CSV
+            </a>
+          </div>
         </div>
 
         <div className="space-y-5 sm:space-y-6">
@@ -171,9 +192,12 @@ export default async function InventoryPage({
                       <li key={product.id} className="p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-medium">
+                            <Link
+                              href={`/inventory/${product.id}`}
+                              className="block truncate text-sm font-medium transition-colors hover:text-[#5B3FD9]"
+                            >
                               {product.name}
-                            </p>
+                            </Link>
                             <p className="mt-0.5 truncate text-xs text-[#1B1635]/45">
                               {product.sku || "No SKU"}
                             </p>
@@ -216,19 +240,17 @@ export default async function InventoryPage({
                           </div>
                         </dl>
 
-                        <form
+                        <ActionForm
                           className="mt-4"
-                          action={async (formData: FormData) => {
-                            "use server";
-                            await deleteProduct(formData);
-                          }}
+                          action={removeProduct}
+                          success="Product deleted"
                         >
                           <input type="hidden" name="id" value={product.id} />
                           <button className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-[#D6453D]/20 px-3 py-2.5 text-sm font-medium text-[#B3342D] transition-colors hover:bg-[#D6453D]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6453D]">
                             {deleteIcon}
                             Delete
                           </button>
-                        </form>
+                        </ActionForm>
                       </li>
                     );
                   })}
@@ -268,9 +290,13 @@ export default async function InventoryPage({
                             className="transition-colors hover:bg-[#F6F5FA]/60"
                           >
                             <td className="max-w-[180px] py-4 pl-5 pr-4 lg:max-w-none lg:pl-7">
-                              <p className="truncate text-sm font-medium">
+                              <Link
+                                href={`/inventory/${product.id}`}
+                                className="block truncate text-sm font-medium transition-colors hover:text-[#5B3FD9]"
+                              >
                                 {product.name}
-                              </p>
+                              </Link>
+
                               <p className="mt-0.5 truncate text-xs text-[#1B1635]/45">
                                 {product.sku || "No SKU"}
                               </p>
@@ -297,23 +323,30 @@ export default async function InventoryPage({
                             <td className="hidden px-4 py-4 text-sm tabular-nums text-[#1B1635]/60 lg:table-cell">
                               {product.lowStockAt || "-"}
                             </td>
+
                             <td className="py-4 pl-4 pr-5 text-right lg:pr-7">
-                              <form
-                                action={async (formData: FormData) => {
-                                  "use server";
-                                  await deleteProduct(formData);
-                                }}
-                              >
-                                <input
-                                  type="hidden"
-                                  name="id"
-                                  value={product.id}
-                                />
-                                <button className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#B3342D] transition-colors hover:bg-[#D6453D]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6453D]">
-                                  {deleteIcon}
-                                  Delete
-                                </button>
-                              </form>
+                              <div className="inline-flex items-center gap-1">
+                                <Link
+                                  href={`/inventory/${product.id}`}
+                                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-[#5B3FD9] transition-colors hover:bg-[#5B3FD9]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5B3FD9]"
+                                >
+                                  History
+                                </Link>
+                                <ActionForm
+                                  action={removeProduct}
+                                  success="Product deleted"
+                                >
+                                  <input
+                                    type="hidden"
+                                    name="id"
+                                    value={product.id}
+                                  />
+                                  <button className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-[#B3342D] transition-colors hover:bg-[#D6453D]/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D6453D]">
+                                    {deleteIcon}
+                                    Delete
+                                  </button>
+                                </ActionForm>
+                              </div>
                             </td>
                           </tr>
                         );

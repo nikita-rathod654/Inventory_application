@@ -1,17 +1,22 @@
 "use client";
 
-import { UserButton } from "@stackframe/stack";
-import { BarChart3, Menu, Package, Plus, Settings, X } from "lucide-react";
+import { useUser } from "@stackframe/stack";
+// import {
+//   BarChart3,
+//   ClipboardList,
+//   Menu,
+//   Package,
+//   Plus,
+//   Settings,
+//   Truck,
+//   X,
+// } from "lucide-react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Add Product", href: "/add-product", icon: Plus },
-  { name: "Settings", href: "/settings", icon: Settings },
-];
+import { LogOut, Menu, X } from "lucide-react";
+import { navigation } from "@/lib/navigation";
 
 function BrandLogo() {
   return (
@@ -37,7 +42,7 @@ export default function Sidebar({ currentPath }: { currentPath?: string }) {
   const pathname = usePathname();
   const activePath = currentPath ?? pathname;
   const [open, setOpen] = useState(false);
-
+const user = useUser();
   // Close drawer when the route changes
   useEffect(() => {
     setOpen(false);
@@ -123,7 +128,8 @@ export default function Sidebar({ currentPath }: { currentPath?: string }) {
           <div className="mb-3 px-3 text-xs font-medium text-white/40">Menu</div>
           {navigation.map((item) => {
             const IconComponent = item.icon;
-            const isActive = activePath === item.href;
+          const isActive =
+  activePath === item.href || activePath?.startsWith(`${item.href}/`);
             return (
               <Link
                 href={item.href}
@@ -154,12 +160,38 @@ export default function Sidebar({ currentPath }: { currentPath?: string }) {
           })}
         </nav>
 
-        {/* User */}
-        <div className="relative mt-auto border-t border-white/10 pt-5">
-          <div className="flex h-16 items-center overflow-hidden rounded-xl bg-white/[0.06] px-2 text-white [&_p]:!text-white [&_button]:w-full [&_button]:justify-start">
-            <UserButton showUserInfo />
-          </div>
-        </div>
+      {/* User */}
+<div className="relative mt-auto border-t border-white/10 pt-5">
+  <div className="flex items-center gap-3 rounded-xl bg-white/[0.06] p-3">
+    {user?.profileImageUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={user.profileImageUrl}
+        alt=""
+        className="h-9 w-9 shrink-0 rounded-full object-cover"
+      />
+    ) : (
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#5B3FD9] text-sm font-semibold">
+        {(user?.displayName || user?.primaryEmail || "U").charAt(0).toUpperCase()}
+      </span>
+    )}
+    <div className="min-w-0 flex-1">
+      <p className="truncate text-sm font-medium">
+        {user?.displayName || "User"}
+      </p>
+      <p className="truncate text-xs text-white/50">{user?.primaryEmail}</p>
+    </div>
+    <button
+      type="button"
+      onClick={() => user?.signOut()}
+      aria-label="Sign out"
+      title="Sign out"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white"
+    >
+      <LogOut className="h-[18px] w-[18px]" />
+    </button>
+  </div>
+</div>
       </aside>
     </>
   );

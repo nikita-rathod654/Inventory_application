@@ -1,10 +1,9 @@
 "use client";
 
+import { navigation } from "@/lib/navigation";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Package, Plus, Settings } from "lucide-react";
 
-// Skeleton component for loading states
 function Skeleton({
   className = "",
   dark = false,
@@ -21,6 +20,9 @@ function Skeleton({
     ></div>
   );
 }
+
+const cardBase =
+  "min-w-0 rounded-2xl border border-[#1B1635]/10 bg-white shadow-sm shadow-[#1B1635]/[0.04] sm:rounded-3xl";
 
 function BrandMark() {
   return (
@@ -42,7 +44,8 @@ function BrandMark() {
   );
 }
 
-// Mobile / tablet top bar (matches the real Sidebar, below lg)
+/* ---------- Sidebar and top bar ---------- */
+
 function LoadingTopBar() {
   return (
     <header className="fixed inset-x-0 top-0 z-30 flex h-14 items-center justify-between bg-[#1B1635] px-4 text-white lg:hidden">
@@ -57,15 +60,7 @@ function LoadingTopBar() {
   );
 }
 
-// Desktop sidebar (lg and up only)
-function LoadingSidebar() {
-  const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-    { name: "Inventory", href: "/inventory", icon: Package },
-    { name: "Add Product", href: "/add-product", icon: Plus },
-    { name: "Settings", href: "/settings", icon: Settings },
-  ];
-
+function LoadingSidebar({ pathname }: { pathname: string }) {
   return (
     <div className="fixed left-0 top-0 z-10 hidden h-dvh w-64 flex-col overflow-hidden bg-[#1B1635] p-5 text-white lg:flex">
       <div
@@ -83,14 +78,32 @@ function LoadingSidebar() {
       <nav className="relative space-y-1" aria-label="Main">
         <div className="mb-3 px-3 text-xs font-medium text-white/40">Menu</div>
         {navigation.map((item) => {
-          const IconComponent = item.icon;
+          const Icon = item.icon;
+          const isActive =
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <Link
-              key={item.name}
+              key={item.href}
               href={item.href}
-              className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+              className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-white/10 text-white"
+                  : "text-white/60 hover:bg-white/[0.06] hover:text-white"
+              }`}
             >
-              <IconComponent className="h-[18px] w-[18px] text-white/50 group-hover:text-white/80" />
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="absolute -left-5 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[#8F7BFF]"
+                />
+              )}
+              <Icon
+                className={`h-[18px] w-[18px] ${
+                  isActive
+                    ? "text-[#B5A6FF]"
+                    : "text-white/50 group-hover:text-white/80"
+                }`}
+              />
               <span>{item.name}</span>
             </Link>
           );
@@ -110,35 +123,61 @@ function LoadingSidebar() {
   );
 }
 
-// Main content skeleton
-function MainContentSkeleton({
-  showSidebar = true,
-}: {
-  showSidebar?: boolean;
-}) {
-  const cardClass =
-    "min-w-0 rounded-2xl border border-[#1B1635]/10 bg-white p-5 shadow-sm shadow-[#1B1635]/[0.04] sm:rounded-3xl sm:p-7";
+/* ---------- Reusable skeleton pieces ---------- */
 
+function HeaderSkeleton({ actions = 1 }: { actions?: number }) {
   return (
-    <main
-      className={
-        showSidebar
-          ? "px-4 pb-8 pt-20 sm:px-6 lg:ml-64 lg:p-8"
-          : "p-4 sm:p-6 lg:p-12"
-      }
-      aria-busy="true"
-      aria-label="Loading"
-    >
-      {/* Header skeleton */}
-      <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
-        <div>
-          <Skeleton className="mb-3 h-7 w-36 sm:h-8 sm:w-40" />
-          <Skeleton className="h-4 w-60 max-w-full sm:w-72" />
-        </div>
-        <Skeleton className="h-9 w-40 rounded-full sm:w-44" />
+    <div className="mb-6 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-4">
+      <div>
+        <Skeleton className="mb-3 h-7 w-36 sm:h-8 sm:w-40" />
+        <Skeleton className="h-4 w-60 max-w-full sm:w-72" />
       </div>
+      {actions > 0 && (
+        <div className="flex gap-2">
+          {Array.from({ length: actions }).map((_, i) => (
+            <Skeleton key={i} className="h-9 w-28 rounded-full sm:w-32" />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
-      {/* Hero band skeleton */}
+function TableSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className={`${cardBase} overflow-hidden`}>
+      <div className="hidden border-b border-[#1B1635]/10 bg-[#F6F5FA]/70 px-5 py-3.5 sm:grid sm:grid-cols-[1.6fr_1fr_1fr_0.7fr] sm:gap-4 lg:px-7">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-3 w-16" />
+        ))}
+      </div>
+      <div className="divide-y divide-[#1B1635]/[0.07]">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div
+            key={i}
+            className="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-4 sm:grid-cols-[1.6fr_1fr_1fr_0.7fr] sm:gap-4 sm:px-5 lg:px-7"
+          >
+            <div>
+              <Skeleton className="mb-1.5 h-4 w-32" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+            <Skeleton className="hidden h-4 w-16 sm:block" />
+            <Skeleton className="hidden h-6 w-24 rounded-full sm:block" />
+            <Skeleton className="ml-auto h-4 w-12" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- One skeleton per page type ---------- */
+
+function DashboardSkeleton() {
+  return (
+    <>
+      <HeaderSkeleton actions={1} />
+
       <div className="mb-5 rounded-2xl bg-[#1B1635] p-5 sm:mb-6 sm:rounded-3xl sm:p-8 lg:p-10">
         <div className="grid items-end gap-6 sm:gap-10 lg:grid-cols-[1.2fr_1fr]">
           <div>
@@ -157,15 +196,14 @@ function MainContentSkeleton({
         </div>
       </div>
 
-      {/* Chart + ring skeleton */}
       <div className="mb-5 grid grid-cols-1 gap-5 sm:mb-6 sm:gap-6 xl:grid-cols-[1.8fr_1fr]">
-        <div className={cardClass}>
+        <div className={`${cardBase} p-5 sm:p-7`}>
           <Skeleton className="mb-2 h-6 w-48 max-w-full" />
           <Skeleton className="mb-6 h-4 w-24 sm:mb-8" />
           <Skeleton className="h-52 w-full rounded-xl sm:h-56" />
         </div>
 
-        <div className={cardClass}>
+        <div className={`${cardBase} p-5 sm:p-7`}>
           <Skeleton className="mb-2 h-6 w-24" />
           <Skeleton className="mb-6 h-4 w-40 max-w-full" />
           <div className="flex justify-center">
@@ -185,45 +223,170 @@ function MainContentSkeleton({
         </div>
       </div>
 
-      {/* Table skeleton */}
-      <div className="min-w-0 overflow-hidden rounded-2xl border border-[#1B1635]/10 bg-white shadow-sm shadow-[#1B1635]/[0.04] sm:rounded-3xl">
-        <div className="px-4 pb-4 pt-5 sm:px-7 sm:pb-5 sm:pt-7">
-          <Skeleton className="mb-2 h-6 w-32" />
-          <Skeleton className="h-4 w-48 max-w-full" />
-        </div>
-        <div className="divide-y divide-[#1B1635]/[0.07] border-t border-[#1B1635]/10">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div
-              key={i}
-              className="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-3.5 sm:grid-cols-[1.5fr_1fr_0.6fr] sm:gap-4 sm:px-7 sm:py-4 md:grid-cols-[1.5fr_1fr_2fr_0.6fr]"
-            >
-              <Skeleton className="h-4 w-28 sm:w-32" />
-              <Skeleton className="hidden h-6 w-24 rounded-full sm:block" />
-              <Skeleton className="hidden h-1.5 w-full rounded-full md:block" />
-              <Skeleton className="ml-auto h-4 w-12 sm:w-14" />
-            </div>
-          ))}
-        </div>
-      </div>
-    </main>
+      <TableSkeleton rows={5} />
+    </>
   );
 }
+
+// search = inventory list, tabs = purchase orders (status filter pills)
+function ListSkeleton({
+  search = false,
+  tabs = false,
+  actions = 2,
+}: {
+  search?: boolean;
+  tabs?: boolean;
+  actions?: number;
+}) {
+  return (
+    <>
+      <HeaderSkeleton actions={actions} />
+      <div className="space-y-5 sm:space-y-6">
+        {tabs && (
+          <div className="flex flex-wrap gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-8 w-20 rounded-full" />
+            ))}
+          </div>
+        )}
+        {search && (
+          <div className={`${cardBase} p-3 sm:p-4`}>
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+        )}
+        <TableSkeleton rows={5} />
+      </div>
+    </>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <>
+      <HeaderSkeleton actions={2} />
+      <div className="space-y-5 sm:space-y-6">
+        <div className={`${cardBase} p-5 sm:p-6`}>
+          <div className="grid gap-4 sm:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i}>
+                <Skeleton className="mb-2 h-3 w-16" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <TableSkeleton rows={3} />
+        <div className="flex gap-3">
+          <Skeleton className="h-9 w-36 rounded-full" />
+          <Skeleton className="h-9 w-32 rounded-full" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+function FormSkeleton({ aside = false }: { aside?: boolean }) {
+  return (
+    <>
+      <HeaderSkeleton actions={0} />
+      <div className={aside ? "grid gap-6 lg:grid-cols-[1.6fr_1fr]" : "max-w-2xl"}>
+        <div className={`${cardBase} space-y-6 p-5 sm:p-8`}>
+          <Skeleton className="h-5 w-32" />
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i}>
+              <Skeleton className="mb-2 h-4 w-28" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+            </div>
+          ))}
+          <div className="flex gap-3 pt-2">
+            <Skeleton className="h-11 w-36 rounded-xl" />
+            <Skeleton className="h-11 w-24 rounded-xl" />
+          </div>
+        </div>
+
+        {aside && (
+          <div className="hidden rounded-2xl bg-[#1B1635] p-6 sm:rounded-3xl lg:block">
+            <Skeleton dark className="mb-4 h-5 w-40" />
+            <Skeleton dark className="mb-2 h-4 w-full" />
+            <Skeleton dark className="mb-2 h-4 w-full" />
+            <Skeleton dark className="mb-6 h-4 w-2/3" />
+            <Skeleton dark className="h-24 w-full rounded-2xl" />
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* ---------- Choose the skeleton from the URL ---------- */
+
+type Variant =
+  | "dashboard"
+  | "inventory"
+  | "suppliers"
+  | "orders"
+  | "detail"
+  | "form"
+  | "form-aside";
+
+function getVariant(pathname: string): Variant {
+  if (pathname === "/dashboard") return "dashboard";
+  if (pathname === "/add-product") return "form-aside";
+  if (
+    pathname === "/settings" ||
+    pathname === "/inventory/import" ||
+    pathname === "/suppliers/new" ||
+    pathname === "/suppliers/import" ||
+    pathname === "/purchase-orders/new" ||
+    pathname.endsWith("/edit")
+  ) {
+    return "form";
+  }
+  if (pathname === "/inventory") return "inventory";
+  if (pathname === "/suppliers") return "suppliers";
+  if (pathname === "/purchase-orders") return "orders";
+  if (
+    pathname.startsWith("/inventory/") ||
+    pathname.startsWith("/purchase-orders/")
+  ) {
+    return "detail";
+  }
+  return "inventory"; // sensible default for any other page
+}
+
+const PUBLIC_ROUTES = ["/", "/sign-in", "/sign-up"];
 
 export default function Loading() {
   const pathname = usePathname();
 
-  // Don't show sidebar on public routes
-  const showSidebar = !["/", "/sign-in", "/sign-up"].includes(pathname);
+  const showSidebar =
+    !PUBLIC_ROUTES.includes(pathname) && !pathname.startsWith("/handler");
+  const variant = getVariant(pathname);
+
+  const mainClass = showSidebar
+    ? `px-4 pb-8 pt-20 sm:px-6 lg:ml-64 ${
+        variant === "dashboard" ? "lg:p-8" : "lg:p-12"
+      }`
+    : "p-4 sm:p-6 lg:p-12";
 
   return (
     <div className="min-h-screen bg-[#F6F5FA]">
       {showSidebar && (
         <>
           <LoadingTopBar />
-          <LoadingSidebar />
+          <LoadingSidebar pathname={pathname} />
         </>
       )}
-      <MainContentSkeleton showSidebar={showSidebar} />
+
+      <main className={mainClass} aria-busy="true" aria-label="Loading">
+        {variant === "dashboard" && <DashboardSkeleton />}
+        {variant === "inventory" && <ListSkeleton search actions={2} />}
+        {variant === "suppliers" && <ListSkeleton actions={2} />}
+        {variant === "orders" && <ListSkeleton tabs actions={1} />}
+        {variant === "detail" && <DetailSkeleton />}
+        {variant === "form" && <FormSkeleton />}
+        {variant === "form-aside" && <FormSkeleton aside />}
+      </main>
     </div>
   );
 }
